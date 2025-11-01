@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Bankroll Scommesse Sportive</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .budget-section {
+            background: #e8f4fc;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .budget-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .budget-input label {
+            font-weight: bold;
+        }
+
+        .budget-input input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+        }
+
+        .budget-input button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .budget-input button:hover {
+            background: #219653;
+        }
+
+        .form-section {
+            padding: 20px;
+            background: #f9f9f9;
+            margin: 0 20px 20px;
+            border-radius: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-add {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #2980b9;
+        }
+
+        .btn-reset {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #c0392b;
+        }
+
+        .table-section {
+            padding: 0 20px 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .profit {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .loss {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .won {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .lost {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .summary {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            margin: 0 20px 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                justify-content: stretch;
+            }
+            
+            .button-group button {
+                flex: 1;
+            }
+            
+            .summary {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gestione Bankroll Scommesse</h1>
+            <p>Inserisci le tue scommesse e traccia il tuo bankroll</p>
+        </header>
+
+        <section class="budget-section">
+            <div class="budget-input">
+                <label for="initial-budget">Budget Iniziale (€):</label>
+                <input type="number" id="initial-budget" placeholder="1000.00" step="0.01" min="0">
+                <button id="set-budget-btn">Imposta Budget</button>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h2>Nuova Scommessa</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="bet-date">Data</label>
+                    <input type="date" id="bet-date">
+                </div>
+                <div class="form-group">
+                    <label for="bet-event">Evento</label>
+                    <input type="text" id="bet-event" placeholder="Es. Juventus - Milan">
+                </div>
+                <div class="form-group">
+                    <label for="bet-type">Tipo di Scommessa</label>
+                    <input type="text" id="bet-type" placeholder="Es. 1X2, Over/Under">
+                </div>
+                <div class="form-group">
+                    <label for="bet-stake">Stake (€)</label>
+                    <input type="number" id="bet-stake" placeholder="0.00" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="bet-odds">Quota</label>
+                    <input type="number" id="bet-odds" placeholder="0.00" step="0.01" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="bet-result">Esito</label>
+                    <select id="bet-result">
+                        <option value="Vinto">Vinto</option>
+                        <option value="Perso">Perso</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-reset" id="reset-form-btn">Reset</button>
+                <button class="btn-add" id="add-bet-btn">Aggiungi Scommessa</button>
+            </div>
+        </section>
+
+        <section class="summary">
+            <div class="summary-item">
+                <span class="summary-value" id="current-balance">€ 0.00</span>
+                <span class="summary-label">Saldo Attuale</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-value" id="total-bets">0</span>
+                <span class="summary-label">Totale Scommesse</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-value" id="win-rate">0%</span>
+                <span class="summary-label">Win Rate</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-value" id="total-profit">€ 0.00</span>
+                <span class="summary-label">Profitto Totale</span>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <table id="bets-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Evento</th>
+                        <th>Tipo</th>
+                        <th>Stake (€)</th>
+                        <th>Quota</th>
+                        <th>Esito</th>
+                        <th>Profitto/Perdita (€)</th>
+                        <th>Saldo (€)</th>
+                        <th>Azione</th>
+                    </tr>
+                </thead>
+                <tbody id="bets-table-body">
+                    <!-- Le righe verranno aggiunte dinamicamente -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        // Variabili globali
+        let initialBudget = 0;
+        let currentBalance = 0;
+        let bets = [];
+        let nextId = 1;
+
+        // Elementi DOM
+        const initialBudgetInput = document.getElementById('initial-budget');
+        const setBudgetBtn = document.getElementById('set-budget-btn');
+        const betDateInput = document.getElementById('bet-date');
+        const betEventInput = document.getElementById('bet-event');
+        const betTypeInput = document.getElementById('bet-type');
+        const betStakeInput = document.getElementById('bet-stake');
+        const betOddsInput = document.getElementById('bet-odds');
+        const betResultInput = document.getElementById('bet-result');
+        const addBetBtn = document.getElementById('add-bet-btn');
+        const resetFormBtn = document.getElementById('reset-form-btn');
+        const betsTableBody = document.getElementById('bets-table-body');
+        const currentBalanceEl = document.getElementById('current-balance');
+        const totalBetsEl = document.getElementById('total-bets');
+        const winRateEl = document.getElementById('win-rate');
+        const totalProfitEl = document.getElementById('total-profit');
+
+        // Inizializzazione
+        document.addEventListener('DOMContentLoaded', function() {
+            // Imposta la data di oggi come default
+            const today = new Date().toISOString().split('T')[0];
+            betDateInput.value = today;
+            
+            // Carica dati dal localStorage se presenti
+            loadFromLocalStorage();
+            updateUI();
+        });
+
+        // Imposta il budget iniziale
+        setBudgetBtn.addEventListener('click', function() {
+            const budget = parseFloat(initialBudgetInput.value);
+            if (isNaN(budget) || budget <= 0) {
+                alert('Inserisci un budget valido');
+                return;
+            }
+            
+            initialBudget = budget;
+            currentBalance = budget;
+            updateUI();
+            saveToLocalStorage();
+            alert(`Budget impostato a € ${budget.toFixed(2)}`);
+        });
+
+        // Aggiungi una nuova scommessa
+        addBetBtn.addEventListener('click', function() {
+            if (initialBudget === 0) {
+                alert('Prima imposta il budget iniziale');
+                return;
+            }
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            const bet = {
+                id: nextId++,
+                date: betDateInput.value,
+                event: betEventInput.value,
+                type: betTypeInput.value,
+                stake: parseFloat(betStakeInput.value),
+                odds: parseFloat(betOddsInput.value),
+                result: betResultInput.value
+            };
+            
+            // Calcola profitto/perdita
+            if (bet.result === 'Vinto') {
+                bet.profit = (bet.stake * bet.odds) - bet.stake;
+            } else {
+                bet.profit = -bet.stake;
+            }
+            
+            // Aggiorna il saldo
+            currentBalance += bet.profit;
+            bet.balanceAfter = currentBalance;
+            
+            // Aggiungi alla lista
+            bets.push(bet);
+            
+            // Aggiorna l'UI
+            updateUI();
+            saveToLocalStorage();
+            resetForm();
+        });
+
+        // Reset del form
+        resetFormBtn.addEventListener('click', resetForm);
+
+        // Funzione per validare il form
+        function validateForm() {
+            if (!betDateInput.value) {
+                alert('Inserisci la data');
+                return false;
+            }
+            
+            if (!betEventInput.value.trim()) {
+                alert('Inserisci l\'evento');
+                return false;
+            }
+            
+            if (!betTypeInput.value.trim()) {
+                alert('Inserisci il tipo di scommessa');
+                return false;
+            }
+            
+            const stake = parseFloat(betStakeInput.value);
+            if (isNaN(stake) || stake <= 0) {
+                alert('Inserisci uno stake valido');
+                return false;
+            }
+            
+            const odds = parseFloat(betOddsInput.value);
+            if (isNaN(odds) || odds < 1) {
+                alert('Inserisci una quota valida (minimo 1.00)');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Reset del form di inserimento
+        function resetForm() {
+            betEventInput.value = '';
+            betTypeInput.value = '';
+            betStakeInput.value = '';
+            betOddsInput.value = '';
+            betResultInput.value = 'Vinto';
+            
+            // Reimposta la data a oggi
+            const today = new Date().toISOString().split('T')[0];
+            betDateInput.value = today;
+        }
+
+        // Elimina una scommessa
+        function deleteBet(id) {
+            if (!confirm('Sei sicuro di voler eliminare questa scommessa?')) {
+                return;
+            }
+            
+            // Trova l'indice della scommessa
+            const index = bets.findIndex(bet => bet.id === id);
+            if (index === -1) return;
+            
+            // Rimuovi la scommessa
+            const deletedBet = bets.splice(index, 1)[0];
+            
+            // Ricalcola il saldo
+            recalculateBalance();
+            
+            // Aggiorna l'UI
+            updateUI();
+            saveToLocalStorage();
+        }
+
+        // Ricalcola il saldo dopo l'eliminazione
+        function recalculateBalance() {
+            currentBalance = initialBudget;
+            bets.forEach(bet => {
+                currentBalance += bet.profit;
+                bet.balanceAfter = currentBalance;
+            });
+        }
+
+        // Aggiorna l'interfaccia utente
+        function updateUI() {
+            updateTable();
+            updateSummary();
+        }
+
+        // Aggiorna la tabella
+        function updateTable() {
+            betsTableBody.innerHTML = '';
+            
+            if (bets.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="9" style="text-align: center; padding: 20px;">Nessuna scommessa inserita</td>`;
+                betsTableBody.appendChild(row);
+                return;
+            }
+            
+            bets.forEach(bet => {
+                const row = document.createElement('tr');
+                
+                // Formatta la data in formato italiano
+                const dateObj = new Date(bet.date + 'T00:00:00');
+                const formattedDate = dateObj.toLocaleDateString('it-IT');
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${bet.event}</td>
+                    <td>${bet.type}</td>
+                    <td>${bet.stake.toFixed(2)}</td>
+                    <td>${bet.odds.toFixed(2)}</td>
+                    <td class="${bet.result === 'Vinto' ? 'won' : 'lost'}">${bet.result}</td>
+                    <td class="${bet.profit >= 0 ? 'profit' : 'loss'}">
+                        ${bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
+                    </td>
+                    <td>${bet.balanceAfter.toFixed(2)}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteBet(${bet.id})">Elimina</button>
+                    </td>
+                `;
+                
+                betsTableBody.appendChild(row);
+            });
+        }
+
+        // Aggiorna il riepilogo
+        function updateSummary() {
+            currentBalanceEl.textContent = `€ ${currentBalance.toFixed(2)}`;
+            totalBetsEl.textContent = bets.length;
+            
+            // Calcola win rate
+            const wonBets = bets.filter(bet => bet.result === 'Vinto').length;
+            const winRate = bets.length > 0 ? (wonBets / bets.length * 100) : 0;
+            winRateEl.textContent = `${winRate.toFixed(1)}%`;
+            
+            // Calcola profitto totale
+            const totalProfit = currentBalance - initialBudget;
+            totalProfitEl.textContent = `€ ${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)}`;
+            totalProfitEl.className = totalProfit >= 0 ? 'profit' : 'loss';
+        }
+
+        // Salva i dati nel localStorage
+        function saveToLocalStorage() {
+            const data = {
+                initialBudget,
+                currentBalance,
+                bets,
+                nextId
+            };
+            localStorage.setItem('bettingTracker', JSON.stringify(data));
+        }
+
+        // Carica i dati dal localStorage
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('bettingTracker');
+            if (saved) {
+                const data = JSON.parse(saved);
+                initialBudget = data.initialBudget || 0;
+                currentBalance = data.currentBalance || initialBudget;
+                bets = data.bets || [];
+                nextId = data.nextId || 1;
+                
+                // Aggiorna l'input del budget
+                initialBudgetInput.value = initialBudget > 0 ? initialBudget : '';
+            }
+        }
+    </script>
+</body>
+</html>
